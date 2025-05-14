@@ -16,6 +16,7 @@ export default function Home() {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -46,7 +47,6 @@ export default function Home() {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
-    // Clear error for the field being edited
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
@@ -84,6 +84,7 @@ export default function Home() {
             studentId: '',
             campaign: '',
           });
+          setShowModal(true); // Show modal on successful submission
         },
         (error) => {
           setMessage(`Failed to send email: ${error.text}`);
@@ -92,6 +93,10 @@ export default function Home() {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
   };
 
   return (
@@ -269,6 +274,24 @@ export default function Home() {
           </p>
         )}
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-bold text-center text-green-600">Thank You!</h2>
+            <p className="text-center text-gray-700 mt-2">
+              Your form has been submitted successfully. We appreciate your response.
+            </p>
+            <button
+              onClick={closeModal}
+              className="mt-4 w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
