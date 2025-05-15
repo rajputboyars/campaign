@@ -1,17 +1,16 @@
-/* app/page.jsx */
 'use client';
 
 import { useState } from 'react';
 import emailjs from '@emailjs/browser';
+import { Mail, PhoneCall, Clock, MapPin } from 'lucide-react';
 
-export default function Home() {
+export default function ContactSection() {
   const [formData, setFormData] = useState({
     name: '',
-    email: '',
-    phone: '',
-    isStudent: false,
+    dob: '',
+    college: '',
     studentId: '',
-    campaign: '',
+    resume: null, // Can be any file type
   });
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
@@ -23,47 +22,74 @@ export default function Home() {
     if (formData.name.length < 2) {
       newErrors.name = 'Name must be at least 2 characters long';
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
+    if (!formData.dob) {
+      newErrors.dob = 'Date of Birth is required';
     }
-    const phoneRegex = /^\d{10}$/;
-    if (!phoneRegex.test(formData.phone)) {
-      newErrors.phone = 'Phone number must be exactly 10 digits';
+    if (!formData.college) {
+      newErrors.college = 'College/University is required';
     }
-    if (formData.isStudent && formData.studentId.length < 5) {
+    if (!formData.studentId || formData.studentId.length < 5) {
       newErrors.studentId = 'Student ID must be at least 5 characters long';
     }
-    if (!formData.campaign) {
-      newErrors.campaign = 'Please select if you are in the campaign';
+    if (!formData.resume) {
+      newErrors.resume = 'File is required';
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, files } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: files ? files[0] : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
 
     setIsLoading(true);
     setMessage('');
 
+    let resumeLink = 'N/A';
+    if (formData.resume) {
+      try {
+        // Validate file size client-side (10 MB limit for Cloudinary free tier)
+        const maxSize = 10 * 1024 * 1024; // 10 MB in bytes
+        if (formData.resume.size > maxSize) {
+          setMessage('File size exceeds 10 MB limit');
+          setIsLoading(false);
+          return;
+        }
+
+        const uploadFormData = new FormData();
+        uploadFormData.append('resume', formData.resume);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || 'Failed to upload file');
+
+        resumeLink = data.url;
+      } catch (error) {
+        setMessage(error.message || 'Failed to upload file. Please try again.');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     const templateParams = {
       from_name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      is_student: formData.isStudent ? 'Yes' : 'No',
-      student_id: formData.isStudent ? formData.studentId : 'N/A',
-      campaign: formData.campaign || 'Not specified',
+      dob: formData.dob,
+      college: formData.college,
+      student_id: formData.studentId,
+      resume: resumeLink,
     };
 
     emailjs
@@ -78,13 +104,12 @@ export default function Home() {
           setMessage('Form submitted successfully! Check your email.');
           setFormData({
             name: '',
-            email: '',
-            phone: '',
-            isStudent: false,
+            dob: '',
+            college: '',
             studentId: '',
-            campaign: '',
+            resume: null,
           });
-          setShowModal(true); // Show modal on successful submission
+          setShowModal(true);
         },
         (error) => {
           setMessage(`Failed to send email: ${error.text}`);
@@ -100,142 +125,144 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">User Information Form</h1>
+    <div className="flex flex-col lg:flex-row justify-between items-center gap-5 md:gap-12 px-6 py-7 md:py-10 lg:py-16 max-w-[1440px] mx-auto">
+      {/* Left Section */}
+      <div className="flex-1 space-y-8">
+        <div>
+          <h2 className="md:text-3xl text-2xl lg:text-4xl font-bold tracking-tight text-black">
+            You Will Grow, You Will <br /> Succeed. We Promise That
+          </h2>
+          <p className="mt-4 text-gray-700 max-w-[654px]">
+            Pellentesque arcu facilisis nunc mi proin. Dignissim mattis in lectus tincidunt tincidunt ultrices.
+            Diam convallis morbi pellentesque adipiscing
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="flex items-start space-x-4">
+            <PhoneCall className="text-emerald-600 w-6 h-6 mt-1" />
+            <div>
+              <h4 className="font-semibold text-black">Call for inquiry</h4>
+              <p className="text-gray-800">+257 388-6895</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-4">
+            <Mail className="text-emerald-600 w-6 h-6 mt-1" />
+            <div>
+              <h4 className="font-semibold text-black">Send us email</h4>
+              <p className="text-gray-800">kramulous@sbcglobal.net</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-4">
+            <Clock className="text-emerald-600 w-6 h-6 mt-1" />
+            <div>
+              <h4 className="font-semibold text-black">Opening hours</h4>
+              <p className="text-gray-800">Mon - Fri: 10AM - 10PM</p>
+            </div>
+          </div>
+          <div className="flex items-start space-x-4">
+            <MapPin className="text-emerald-600 w-6 h-6 mt-1" />
+            <div>
+              <h4 className="font-semibold text-black">Office</h4>
+              <p className="text-gray-800">19 North Road Piscataway, NY 08854</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Section */}
+      <div className="flex-1 w-full bg-[#EBF5F4] p-5 md:p-8 rounded-2xl max-w-[584px]">
+        <h3 className="text-xl font-semibold text-center text-black">User Information Form</h3>
+        <p className="text-center text-gray-700 mt-1 mb-6">
+          Submit your details and file to get started
+        </p>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
+            <label className="block text-sm font-medium mb-1">Name</label>
             <input
               type="text"
-              id="name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              className={`mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.name ? 'border-red-500' : 'border-gray-300 focus:ring-blue-500'
+              placeholder="Your name"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors.name ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
               }`}
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          {/* Email */}
+          {/* Date of Birth */}
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block text-sm font-medium mb-1">Date of Birth</label>
             <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="date"
+              name="dob"
+              value={formData.dob}
               onChange={handleChange}
-              className={`mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.email ? 'border-red-500' : 'border-gray-300 focus:ring-blue-500'
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors.dob ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
               }`}
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+            {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
           </div>
 
-          {/* Phone */}
+          {/* College/University */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone
-            </label>
+            <label className="block text-sm font-medium mb-1">College/University</label>
             <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              type="text"
+              name="college"
+              value={formData.college}
               onChange={handleChange}
-              className={`mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.phone ? 'border-red-500' : 'border-gray-300 focus:ring-blue-500'
+              placeholder="Your college/university"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors.college ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
               }`}
             />
-            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
+            {errors.college && <p className="text-red-500 text-xs mt-1">{errors.college}</p>}
           </div>
 
-          {/* Is Student Checkbox */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isStudent"
-              name="isStudent"
-              checked={formData.isStudent}
-              onChange={handleChange}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isStudent" className="ml-2 text-sm text-gray-700">
-              Is Student
-            </label>
-          </div>
-
-          {/* Student ID (Conditional) */}
-          {formData.isStudent && (
-            <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700">
-                Student ID
-              </label>
-              <input
-                type="text"
-                id="studentId"
-                name="studentId"
-                value={formData.studentId}
-                onChange={handleChange}
-                className={`mt-1 block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  errors.studentId ? 'border-red-500' : 'border-gray-300 focus:ring-blue-500'
-                }`}
-              />
-              {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>}
-            </div>
-          )}
-
-          {/* Campaign Radio Buttons */}
+          {/* Student ID */}
           <div>
-            <p className="text-sm font-medium text-gray-700">Are you in this campaign?</p>
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="campaignYes"
-                  name="campaign"
-                  value="Yes"
-                  checked={formData.campaign === 'Yes'}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <label htmlFor="campaignYes" className="ml-2 text-sm text-gray-700">
-                  Yes
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="campaignNo"
-                  name="campaign"
-                  value="No"
-                  checked={formData.campaign === 'No'}
-                  onChange={handleChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <label htmlFor="campaignNo" className="ml-2 text-sm text-gray-700">
-                  No
-                </label>
-              </div>
-              {errors.campaign && <p className="text-red-500 text-xs mt-1">{errors.campaign}</p>}
-            </div>
+            <label className="block text-sm font-medium mb-1">Student ID</label>
+            <input
+              type="text"
+              name="studentId"
+              value={formData.studentId}
+              onChange={handleChange}
+              placeholder="Your student ID"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors.studentId ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+              }`}
+            />
+            {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>}
+          </div>
+
+          {/* File Upload */}
+          <div>
+            <label className="block text-sm font-medium mb-1">File (PDF, Images)</label>
+            <input
+              type="file"
+              name="resume"
+              accept=".pdf,image/*,.xls,.xlsx,.csv"
+              onChange={handleChange}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
+                errors.resume ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+              }`}
+            />
+            {errors.resume && <p className="text-red-500 text-xs mt-1">{errors.resume}</p>}
           </div>
 
           {/* Submit Button with Loader */}
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full p-2 rounded-md flex items-center justify-center text-white ${
-              isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className={`w-full flex items-center justify-center text-white font-medium py-2 rounded-md transition ${
+              isLoading ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'
+            }`}
           >
             {isLoading ? (
               <>
@@ -269,7 +296,7 @@ export default function Home() {
 
         {/* Message */}
         {message && (
-          <p className={`mt-4 text-center text-sm ${message.includes('Failed') ? 'text-red-600' : 'text-green-600'}`}>
+          <p className={`mt-4 text-center text-sm ${message.includes('Failed') ? 'text-red-500' : 'text-green-600'}`}>
             {message}
           </p>
         )}
@@ -285,7 +312,7 @@ export default function Home() {
             </p>
             <button
               onClick={closeModal}
-              className="mt-4 w-full bg-blue-600 text-white p-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-4 w-full bg-emerald-600 text-white font-medium py-2 rounded-md hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             >
               Close
             </button>
