@@ -143,14 +143,14 @@ export default function ContactSection() {
             <PhoneCall className="text-emerald-600 w-6 h-6 mt-1" />
             <div>
               <h4 className="font-semibold text-black">Call for inquiry</h4>
-              <p className="text-gray-800">+257 388-6895</p>
+              <p className="text-gray-800">+236 833 9770</p>
             </div>
           </div>
           <div className="flex items-start space-x-4">
             <Mail className="text-emerald-600 w-6 h-6 mt-1" />
             <div>
               <h4 className="font-semibold text-black">Send us email</h4>
-              <p className="text-gray-800">kramulous@sbcglobal.net</p>
+              <p className="text-gray-800">globalstaffing499@gmail.com</p>
             </div>
           </div>
           <div className="flex items-start space-x-4">
@@ -160,13 +160,13 @@ export default function ContactSection() {
               <p className="text-gray-800">Mon - Fri: 10AM - 10PM</p>
             </div>
           </div>
-          <div className="flex items-start space-x-4">
+          {/* <div className="flex items-start space-x-4">
             <MapPin className="text-emerald-600 w-6 h-6 mt-1" />
             <div>
               <h4 className="font-semibold text-black">Office</h4>
               <p className="text-gray-800">19 North Road Piscataway, NY 08854</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
