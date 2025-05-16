@@ -143,7 +143,7 @@ export default function ContactSection() {
             <PhoneCall className="text-emerald-600 w-6 h-6 mt-1" />
             <div>
               <h4 className="font-semibold text-black">Call for inquiry</h4>
-              <p className="text-gray-800">+236 833 9770</p>
+              <p className="text-gray-800">+1(236)833-9770</p>
             </div>
           </div>
           <div className="flex items-start space-x-4">
