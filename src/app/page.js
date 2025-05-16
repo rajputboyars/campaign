@@ -10,6 +10,8 @@ export default function ContactSection() {
     dob: '',
     college: '',
     studentId: '',
+    email: '', // New email field
+    phone: '', // New phone field
     resume: null, // Can be any file type
   });
   const [errors, setErrors] = useState({});
@@ -30,6 +32,12 @@ export default function ContactSection() {
     }
     if (!formData.studentId || formData.studentId.length < 5) {
       newErrors.studentId = 'Student ID must be at least 5 characters long';
+    }
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'A valid email address is required';
+    }
+    if (!formData.phone || !/^\d{10,15}$/.test(formData.phone.replace(/[\s-]/g, ''))) {
+      newErrors.phone = 'Phone number must be 10-15 digits';
     }
     if (!formData.resume) {
       newErrors.resume = 'File is required';
@@ -89,6 +97,8 @@ export default function ContactSection() {
       dob: formData.dob,
       college: formData.college,
       student_id: formData.studentId,
+      email: formData.email, // Include email in email template
+      phone: formData.phone, // Include phone in email template
       resume: resumeLink,
     };
 
@@ -107,6 +117,8 @@ export default function ContactSection() {
             dob: '',
             college: '',
             studentId: '',
+            email: '', // Reset email
+            phone: '', // Reset phone
             resume: null,
           });
           setShowModal(true);
@@ -125,7 +137,7 @@ export default function ContactSection() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between items-center gap-5 md:gap-12 px-6 py-7 md:py-10 lg:py-16 max-w-[1440px] mx-auto">
+    <div className="flex flex-col lg:flex-row justify-between items-center gap-5 md:gap-12 px-6 py-7 md:py-10 lg:py-8 max-w-[1440px] mx-auto">
       {/* Left Section */}
       <div className="flex-1 space-y-8">
         <div>
@@ -160,13 +172,6 @@ export default function ContactSection() {
               <p className="text-gray-800">Mon - Fri: 10AM - 10PM</p>
             </div>
           </div>
-          {/* <div className="flex items-start space-x-4">
-            <MapPin className="text-emerald-600 w-6 h-6 mt-1" />
-            <div>
-              <h4 className="font-semibold text-black">Office</h4>
-              <p className="text-gray-800">19 North Road Piscataway, NY 08854</p>
-            </div>
-          </div> */}
         </div>
       </div>
 
@@ -187,26 +192,42 @@ export default function ContactSection() {
               value={formData.name}
               onChange={handleChange}
               placeholder="Your name"
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.name ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.name ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                }`}
             />
             {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
           </div>
 
-          {/* Date of Birth */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Date of Birth</label>
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.dob ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
-              }`}
-            />
-            {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
+          <div className='flex gap-4'>
+
+            {/* Date of Birth */}
+            <div className='flex-1'>
+              <label className="block text-sm font-medium mb-1">Date of Birth</label>
+              <input
+                type="date"
+                name="dob"
+                value={formData.dob}
+                onChange={handleChange}
+                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.dob ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                  }`}
+              />
+              {errors.dob && <p className="text-red-500 text-xs mt-1">{errors.dob}</p>}
+            </div>
+
+            {/* Student ID */}
+            <div className='flex-1'>
+              <label className="block text-sm font-medium mb-1">Student ID</label>
+              <input
+                type="text"
+                name="studentId"
+                value={formData.studentId}
+                onChange={handleChange}
+                placeholder="Your student ID"
+                className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.studentId ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                  }`}
+              />
+              {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>}
+            </div>
           </div>
 
           {/* College/University */}
@@ -218,27 +239,41 @@ export default function ContactSection() {
               value={formData.college}
               onChange={handleChange}
               placeholder="Your college/university"
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.college ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.college ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                }`}
             />
             {errors.college && <p className="text-red-500 text-xs mt-1">{errors.college}</p>}
           </div>
 
-          {/* Student ID */}
+
+          {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">Student ID</label>
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
-              type="text"
-              name="studentId"
-              value={formData.studentId}
+              type="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              placeholder="Your student ID"
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.studentId ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
-              }`}
+              placeholder="Your email address"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.email ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                }`}
             />
-            {errors.studentId && <p className="text-red-500 text-xs mt-1">{errors.studentId}</p>}
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Phone Number</label>
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Your phone number"
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.phone ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                }`}
+            />
+            {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
           </div>
 
           {/* File Upload */}
@@ -249,9 +284,8 @@ export default function ContactSection() {
               name="resume"
               accept=".pdf,image/*,.xls,.xlsx,.csv"
               onChange={handleChange}
-              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                errors.resume ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
-              }`}
+              className={`w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 ${errors.resume ? 'border-red-500' : 'border-gray-300 focus:ring-emerald-500'
+                }`}
             />
             {errors.resume && <p className="text-red-500 text-xs mt-1">{errors.resume}</p>}
           </div>
@@ -260,9 +294,8 @@ export default function ContactSection() {
           <button
             type="submit"
             disabled={isLoading}
-            className={`w-full flex items-center justify-center text-white font-medium py-2 rounded-md transition ${
-              isLoading ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'
-            }`}
+            className={`w-full flex items-center justify-center text-white font-medium py-2 rounded-md transition ${isLoading ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-700'
+              }`}
           >
             {isLoading ? (
               <>
